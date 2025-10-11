@@ -1,0 +1,792 @@
+{
+  "name": "News workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -192
+      ],
+      "id": "1d96844e-7c0d-4003-8133-8dbf02a952c2",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "weaviateCollection": {
+          "__rl": true,
+          "value": "NewsItem",
+          "mode": "list",
+          "cachedResultName": "NewsItem"
+        },
+        "embeddingBatchSize": 1,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreWeaviate",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        112
+      ],
+      "id": "cc92d8c2-86d1-4444-9a86-25e6ad92e545",
+      "name": "Weaviate Vector Store",
+      "credentials": {
+        "weaviateApi": {
+          "id": "ulZx6drVATtpRqog",
+          "name": "Weaviate Credentials account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        320
+      ],
+      "id": "590c972e-0a54-4c62-94eb-b904673a5be2",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "XCfCBm7t07zGQOZL",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.title + '.' + $json.content}}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "content",
+                "value": "={{ $json.content }}"
+              },
+              {
+                "name": "created_at",
+                "value": "={{ $json.publishedAt }}"
+              },
+              {
+                "name": "title",
+                "value": "={{ $json.title }}"
+              },
+              {
+                "name": "imageUrl",
+                "value": "={{ $json.imageUrl }}"
+              },
+              {
+                "name": "textUrl",
+                "value": "={{ $json.textUrl }}"
+              },
+              {
+                "name": "text",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        368
+      ],
+      "id": "0d6fe385-7977-438a-9a7a-ab8c9a116f54",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "fromEmail": "{{$env.N8N_SENDER_EMAIL}}",
+        "toEmail": "{{$env.N8N_USER_EMAIL}}",
+        "subject": "News from news platform",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        -128
+      ],
+      "id": "5be4e718-a9c9-4a18-88c4-e3877a793c7e",
+      "name": "Send email1",
+      "webhookId": "86ba9a8e-75d6-41c3-b1b7-a1be1d6240d6",
+      "credentials": {
+        "smtp": {
+          "id": "RA5HHgA9MM65BAml",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        208
+      ],
+      "id": "1d337cd9-1822-4ede-8a7a-17ae45ee2ee6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://gnews.io/api/v4/top-headlines",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": " entertainment"
+            },
+            {
+              "name": "max",
+              "value": "15"
+            },
+            {
+              "name": "country",
+              "value": "us"
+            },
+            {
+              "name": "lang",
+              "value": "en"
+            },
+            {
+              "name": "apikey",
+              "value": "{{$env.N8N_GNEWS_KEY}}"
+            },
+            {
+              "name": "expand",
+              "value": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -672,
+        -16
+      ],
+      "id": "76a561eb-f33c-4e56-aa32-3d45c22797e2",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "url": "https://gnews.io/api/v4/top-headlines",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "science"
+            },
+            {
+              "name": "max",
+              "value": "5"
+            },
+            {
+              "name": "country",
+              "value": "us"
+            },
+            {
+              "name": "lang",
+              "value": "en"
+            },
+            {
+              "name": "apikey",
+              "value": "{{$env.N8N_GNEWS_KEY}}"
+            },
+            {
+              "name": "expand",
+              "value": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -688,
+        160
+      ],
+      "id": "74583935-91eb-478a-9e7f-64d671bd79b6",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -16
+      ],
+      "id": "50103fc1-0058-449c-8234-a59564b324e7",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        160
+      ],
+      "id": "67bce4b7-5009-45b0-966e-c5d2adaf3f96",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "url": "https://gnews.io/api/v4/top-headlines",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "nation"
+            },
+            {
+              "name": "max",
+              "value": "10"
+            },
+            {
+              "name": "country",
+              "value": "us"
+            },
+            {
+              "name": "lang",
+              "value": "en"
+            },
+            {
+              "name": "apikey",
+              "value": "{{$env.N8N_GNEWS_KEY}}"
+            },
+            {
+              "name": "expand",
+              "value": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -688,
+        384
+      ],
+      "id": "7be29b1f-9aad-44ab-a99c-3b6f9e405e91",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        384
+      ],
+      "id": "c43d5b13-a3f7-4577-ad70-b03fadd85a72",
+      "name": "Split Out5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2f07b95-d16a-4f5d-a6fd-053b7ca2be93",
+              "name": "message.content",
+              "value": "={{ (() => { \n  try {\n    const raw = $json.message?.content ?? $json.choices?.[0]?.message?.content ?? '';\n    return String(JSON.parse(raw).summary || '');\n  } catch(e) {\n    return '';\n  }\n})() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        -96
+      ],
+      "id": "25e507db-2baa-4cf1-9b4a-b7d6617df6e5",
+      "name": "Filter summaries"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a domain expert and a strict JSON generator. \n- If the item fits the criteria, produce a concise, accurate summary as a specialist.\n- If it does not, produce an empty summary.\nOutput STRICT JSON only. No prose, no markdown.",
+              "role": "system"
+            },
+            {
+              "content": "=Decide whether to KEEP or DROP the item using these rules:\n- KEEP if related to new technologies, science, or business topics.\n- KEEP if about pop or rock artists/singers, actors.\n- DROP if about sports.\n- KEEP if about politics.\n- DROP if about computer games.\n- DROP if about culinary recipies.\n- When unsure, DROP.\n\nIf KEEP: write a concise specialist summary (5-6 sentences max) of \"content\" using the language of \"content\".\nIf DROP: set summary to \"\".\n\nReturn JSON ONLY in this exact schema:\n{\n  \"decision\": \"KEEP\" | \"DROP\",\n  \"summary\": \"<string or empty string>\"\n}\n\n\nItem:\n{\n  \"title\": \"{{$json.title}}\",\n  \"description\": \"{{$json.description}}\",\n  \"content\": \"{{$json.content}}\",\n  \"textUrl\": \"{{$json.url}}\",\n  \"imageUrl\": \"{{$json.image}}\"\n}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -144,
+        -96
+      ],
+      "id": "5aea9b23-745a-4b8a-af57-ee4243149b33",
+      "name": "Summary articles",
+      "credentials": {
+        "openAiApi": {
+          "id": "XCfCBm7t07zGQOZL",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a6c0098c-be12-484d-97fc-7dde25d6ca2e",
+      "name": "Join articles with summaries"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da113144-3d6b-46c7-9938-6ebb24146fa0",
+              "leftValue": "={{ $json.message.content }}",
+              "rightValue": "\"\"",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "78754183-76d7-46d2-88a0-429454290a99",
+      "name": "Remove articles with null summary"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a2351f4-710a-498d-9d4c-51ffe0933d72",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "8b26f03e-72c0-4a69-83b1-3307fd49c34c",
+              "name": "content",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            },
+            {
+              "id": "83859631-6fa4-457b-b1c4-27d3594341d1",
+              "name": "publishedAt",
+              "value": "={{ $json.publishedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "59e5b207-8367-443e-ae1f-537589403f2f",
+              "name": "imageUrl",
+              "value": "={{ $json.image }}",
+              "type": "string"
+            },
+            {
+              "id": "6bb7b756-3d0a-464c-9f42-488e150ef323",
+              "name": "textUrl",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "c8d2defa-e0d6-493d-b950-ba1065fcee4f",
+              "name": "text",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        0
+      ],
+      "id": "43cab0b3-9080-4c00-a312-933e25e89d32",
+      "name": "Organize fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "function esc(s='') {\n  return String(s)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;');\n}\n\nfunction nl2br(s='') {\n  return esc(String(s)).replace(/\\r\\n|\\r|\\n/g, '<br>');\n}\n\nconst itemsIn = items.map(i => i.json);\n\n// Plain-text fallback (full content, no truncation)\nconst lines = itemsIn.map((it, idx) => {\n  const t = it.title || '(untitled)';\n  const u = it.textUrl || '';\n  const c = String(it.content || '').trim();\n  return `${idx+1}. ${t}\\n${u}\\n${c}\\n`;\n});\nconst text = lines.join('\\n');\n\nconst cards = itemsIn.map((it) => {\n  const title = esc(it.title || '(untitled)');\n  const url   = it.textUrl || '#';\n  const img   = it.imageUrl || '';\n  const body  = nl2br(it.content || '');\n\n  return `\n  <tr>\n    <td style=\"padding:16px 20px; border-bottom:1px solid #e9ecef;\">\n      ${img ? `\n        <div style=\"margin:0 0 12px 0;\">\n          <a href=\"${url}\" target=\"_blank\" style=\"text-decoration:none;\">\n            <img src=\"${img}\" alt=\"\" width=\"560\" style=\"width:100%; max-width:560px; height:auto; display:block; border-radius:12px;\">\n          </a>\n        </div>` : ''}\n\n      <h3 style=\"margin:0 0 8px 0; font-family:Arial,Helvetica,sans-serif; font-size:18px; line-height:1.3;\">\n        <a href=\"${url}\" target=\"_blank\" style=\"color:#0b5cab; text-decoration:none;\">${title}</a>\n      </h3>\n\n      <div style=\"margin:0 0 10px 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#212529; line-height:1.6;\">\n        ${body}\n      </div>\n\n      <a href=\"${url}\" target=\"_blank\"\n         style=\"display:inline-block; padding:8px 12px; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#ffffff; background:#0b5cab; text-decoration:none; border-radius:8px;\">\n         Open link\n      </a>\n    </td>\n  </tr>`;\n}).join('\\n');\n\nconst count = itemsIn.length;\n\nconst html = `\n<!doctype html>\n<html>\n  <body style=\"margin:0; padding:0; background:#f6f8fa;\">\n    <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"background:#f6f8fa; padding:20px 0;\">\n      <tr>\n        <td align=\"center\">\n          <table role=\"presentation\" width=\"620\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.06);\">\n            <tr>\n              <td style=\"padding:18px 20px; background:#0b5cab;\">\n                <h2 style=\"margin:0; font-family:Arial,Helvetica,sans-serif; font-size:20px; color:#ffffff;\">Your ${count} item${count!==1?'s':''}</h2>\n              </td>\n            </tr>\n            ${cards}\n            <tr>\n              <td style=\"padding:14px 20px; background:#f1f5f9; color:#64748b; font-family:Arial,Helvetica,sans-serif; font-size:12px;\">\n                Sent via n8n\n              </td>\n            </tr>\n          </table>\n        </td>\n      </tr>\n    </table>\n  </body>\n</html>\n`;\n\nreturn [\n  { json: { subject: `Digest – ${count} item${count!==1?'s':''}`, html, text } }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -64
+      ],
+      "id": "bfedbb3f-388f-45cf-bf09-9a0119e873d0",
+      "name": "Create email text"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -272,
+        160
+      ],
+      "id": "736dec4a-78ce-49d0-bc66-ae017fb7314d",
+      "name": "Merge Gnews articles"
+    },
+    {
+      "parameters": {
+        "url": "https://gnews.io/api/v4/top-headlines",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "business"
+            },
+            {
+              "name": "max",
+              "value": "10"
+            },
+            {
+              "name": "country",
+              "value": "us"
+            },
+            {
+              "name": "lang",
+              "value": "en"
+            },
+            {
+              "name": "apikey",
+              "value": "{{$env.N8N_GNEWS_KEY}}"
+            },
+            {
+              "name": "expand",
+              "value": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -672,
+        -192
+      ],
+      "id": "fde880ac-2230-4ac2-a750-72361ea86d27",
+      "name": "Gnews request, topic1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge Gnews articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Weaviate Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Weaviate Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gnews request, topic1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Merge Gnews articles",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Merge Gnews articles",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "HTTP Request7": {
+      "main": [
+        [
+          {
+            "node": "Split Out5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out5": {
+      "main": [
+        [
+          {
+            "node": "Merge Gnews articles",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Filter summaries": {
+      "main": [
+        [
+          {
+            "node": "Join articles with summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summary articles": {
+      "main": [
+        [
+          {
+            "node": "Filter summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join articles with summaries": {
+      "main": [
+        [
+          {
+            "node": "Remove articles with null summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove articles with null summary": {
+      "main": [
+        [
+          {
+            "node": "Organize fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organize fields": {
+      "main": [
+        [
+          {
+            "node": "Weaviate Vector Store",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create email text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create email text": {
+      "main": [
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Gnews articles": {
+      "main": [
+        [
+          {
+            "node": "Summary articles",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Join articles with summaries",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gnews request, topic1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3e53d816-3e2b-41c2-ac64-0e80240c1f81",
+  "meta": {
+    "instanceId": "1305db74f5b0f034a245e1b26bba5128d25e7254470f7223335d8254dcd2cc34"
+  },
+  "id": "uFOw94xbwJe7PY0I",
+  "tags": []
+}

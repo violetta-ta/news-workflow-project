@@ -1,0 +1,225 @@
+{
+  "name": "News retrieval",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "load",
+        "weaviateCollection": {
+          "__rl": true,
+          "value": "NewsItem",
+          "mode": "list",
+          "cachedResultName": "NewsItem"
+        },
+        "prompt": "={{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreWeaviate",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        -80
+      ],
+      "id": "855aef74-5e79-4388-97db-2a208adc39dc",
+      "name": "Weaviate Vector Store1",
+      "credentials": {
+        "weaviateApi": {
+          "id": "ulZx6drVATtpRqog",
+          "name": "Weaviate Credentials account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        128
+      ],
+      "id": "e62523cf-630a-4fc4-9049-0eba75a37a64",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "XCfCBm7t07zGQOZL",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        -80
+      ],
+      "id": "174172cb-efc5-4f51-8cbf-63f3c35718af",
+      "name": "When chat message received",
+      "webhookId": "dcbd0848-6bd6-4989-9008-abb6b21e8926"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a2351f4-710a-498d-9d4c-51ffe0933d72",
+              "name": "title",
+              "value": "={{ $json.document.metadata.title}}",
+              "type": "string"
+            },
+            {
+              "id": "8b26f03e-72c0-4a69-83b1-3307fd49c34c",
+              "name": "content",
+              "value": "={{ $json.document.metadata.content }}",
+              "type": "string"
+            },
+            {
+              "id": "83859631-6fa4-457b-b1c4-27d3594341d1",
+              "name": "publishedAt",
+              "value": "={{  $json.document.metadata.created_at}}",
+              "type": "string"
+            },
+            {
+              "id": "59e5b207-8367-443e-ae1f-537589403f2f",
+              "name": "imageUrl",
+              "value": "={{  $json.document.metadata.imageUrl}}",
+              "type": "string"
+            },
+            {
+              "id": "6bb7b756-3d0a-464c-9f42-488e150ef323",
+              "name": "textUrl",
+              "value": "={{ $json.document.metadata.textUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "c8d2defa-e0d6-493d-b950-ba1065fcee4f",
+              "name": "text",
+              "value": "={{$json.document.pageContent}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        -80
+      ],
+      "id": "d96c7032-07bc-4c49-906a-52af7d6cdadf",
+      "name": "Organize fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function esc(s='') {\n  return String(s)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;');\n}\n\nfunction nl2br(s='') {\n  return esc(String(s)).replace(/\\r\\n|\\r|\\n/g, '<br>');\n}\n\nconst itemsIn = items.map(i => i.json);\n\n// Plain-text fallback (full content, no truncation)\nconst lines = itemsIn.map((it, idx) => {\n  const t = it.title || '(untitled)';\n  const u = it.textUrl || '';\n  const c = String(it.content || '').trim();\n  return `${idx+1}. ${t}\\n${u}\\n${c}\\n`;\n});\nconst text = lines.join('\\n');\n\nconst cards = itemsIn.map((it) => {\n  const title = esc(it.title || '(untitled)');\n  const url   = it.textUrl || '#';\n  const img   = it.imageUrl || '';\n  const body  = nl2br(it.content || '');\n\n  return `\n  <tr>\n    <td style=\"padding:16px 20px; border-bottom:1px solid #e9ecef;\">\n      ${img ? `\n        <div style=\"margin:0 0 12px 0;\">\n          <a href=\"${url}\" target=\"_blank\" style=\"text-decoration:none;\">\n            <img src=\"${img}\" alt=\"\" width=\"560\" style=\"width:100%; max-width:560px; height:auto; display:block; border-radius:12px;\">\n          </a>\n        </div>` : ''}\n\n      <h3 style=\"margin:0 0 8px 0; font-family:Arial,Helvetica,sans-serif; font-size:18px; line-height:1.3;\">\n        <a href=\"${url}\" target=\"_blank\" style=\"color:#0b5cab; text-decoration:none;\">${title}</a>\n      </h3>\n\n      <div style=\"margin:0 0 10px 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#212529; line-height:1.6;\">\n        ${body}\n      </div>\n\n      <a href=\"${url}\" target=\"_blank\"\n         style=\"display:inline-block; padding:8px 12px; font-family:Arial,Helvetica,sans-serif; font-size:13px; color:#ffffff; background:#0b5cab; text-decoration:none; border-radius:8px;\">\n         Open link\n      </a>\n    </td>\n  </tr>`;\n}).join('\\n');\n\nconst count = itemsIn.length;\n\nconst html = `\n<!doctype html>\n<html>\n  <body style=\"margin:0; padding:0; background:#f6f8fa;\">\n    <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"background:#f6f8fa; padding:20px 0;\">\n      <tr>\n        <td align=\"center\">\n          <table role=\"presentation\" width=\"620\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"background:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.06);\">\n            <tr>\n              <td style=\"padding:18px 20px; background:#0b5cab;\">\n                <h2 style=\"margin:0; font-family:Arial,Helvetica,sans-serif; font-size:20px; color:#ffffff;\">Your ${count} item${count!==1?'s':''}</h2>\n              </td>\n            </tr>\n            ${cards}\n            <tr>\n              <td style=\"padding:14px 20px; background:#f1f5f9; color:#64748b; font-family:Arial,Helvetica,sans-serif; font-size:12px;\">\n                Sent via n8n\n              </td>\n            </tr>\n          </table>\n        </td>\n      </tr>\n    </table>\n  </body>\n</html>\n`;\n\nreturn [\n  { json: { subject: `Digest – ${count} item${count!==1?'s':''}`, html, text } }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -80
+      ],
+      "id": "0fa13280-b526-4ca3-8cac-aa11ced242fc",
+      "name": "Create email text1"
+    },
+    {
+      "parameters": {
+        "fromEmail": "{{$env.N8N_SENDER_EMAIL}}",
+        "toEmail": "{{$env.N8N_USER_EMAIL}}",
+        "subject": "News from news platform",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        528,
+        -80
+      ],
+      "id": "94a9b83a-b87c-4a75-bdd0-983c87d9e5d3",
+      "name": "Send email",
+      "webhookId": "86ba9a8e-75d6-41c3-b1b7-a1be1d6240d6",
+      "credentials": {
+        "smtp": {
+          "id": "RA5HHgA9MM65BAml",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weaviate Vector Store1": {
+      "main": [
+        [
+          {
+            "node": "Organize fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Weaviate Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Weaviate Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organize fields1": {
+      "main": [
+        [
+          {
+            "node": "Create email text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create email text1": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e7d5a45a-cef3-4aa6-969b-153ba83716ee",
+  "meta": {
+    "instanceId": "1305db74f5b0f034a245e1b26bba5128d25e7254470f7223335d8254dcd2cc34"
+  },
+  "id": "KIZBGGSzqoc5wcdr",
+  "tags": []
+}
