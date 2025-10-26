@@ -26,7 +26,9 @@ The workflow is fully visual — no custom coding required.
 ## 🧩 Files for n8n workflow
 
 n8n_workflow/
+
 ├── News workflow 2.json 
+
 └── News retrieval.json 
 
 
@@ -52,9 +54,13 @@ You can import the JSON file directly into your n8n instance from the main dashb
 2. Create a .env files with the keys, and make it available inside the docker (you can insert respective variable references in the n8n docker's "environment" section)
 
 -N8N_SENDER_EMAIL
+
 -N8N_USER_EMAIL
+
 -N8N_GNEWS_KEY
+
 -N8N_WEAVIATE_KEY
+
 -N8N_OPENAI
 
 
@@ -66,6 +72,7 @@ You can import the JSON file directly into your n8n instance from the main dashb
 OpenAI SDK version of agent is described here:
 
 Open_ai_news_agent/
+
 ├── news_agent_example.ipynb 
 
 This is an intermediate version of the agent, used for the article. This version demonstrates the main principle of the news collection and processing with OpenAI SDK library, but the agent is not yet optimized by token usage and performance. 
