@@ -1,4 +1,4 @@
-# 🧠 AI News Digest Workflow (n8n)
+# 🧠 AI News Digest Workflow
 
 This project demonstrates how an **AI-powered workflow** can automatically fetch, summarize, and deliver personalized news using the **n8n** automation framework.  
 It was created as part of my exploration of different types of AI agents (workflow-based, coding, and autonomous) described in my Medium article:  
@@ -6,7 +6,7 @@ It was created as part of my exploration of different types of AI agents (workfl
 
 ---
 
-## 🚀 Overview
+## 🚀 Overview of n8n workflow
 
 The workflow connects several APIs and LLM functions to generate a personalized news digest twice a day.  
 It was built in **n8n Community Edition (self-hosted)** and uses OpenAI’s GPT-4o-mini model for summarization.
@@ -23,7 +23,7 @@ The workflow is fully visual — no custom coding required.
 
 ---
 
-## 🧩 Files
+## 🧩 Files for n8n workflow
 
 n8n_workflow/
 ├── News workflow 2.json 
@@ -34,7 +34,7 @@ You can import the JSON file directly into your n8n instance from the main dashb
 
 ---
 
-## ⚙️ Requirements
+## ⚙️ Requirements for n8n workflow
 
 - [n8n](https://n8n.io) (Community or Cloud edition)  
 - Free or paid [GNews API](https://gnews.io/) key  
@@ -43,7 +43,7 @@ You can import the JSON file directly into your n8n instance from the main dashb
 
 ---
 
-## 🪄 Setup Instructions
+## 🪄 n8n setup Instructions
 
 1. Install n8n and Weaviate in the same docker using the instruction on their web-sites:
 - https://docs.weaviate.io/deploy/installation-guides/docker-installation
@@ -59,4 +59,18 @@ You can import the JSON file directly into your n8n instance from the main dashb
 
 
 3. Create the credentials in your n8n instance with the respective keys, import the workflow
+
+
+## OpenAI SDK agent
+
+OpenAI SDK version of agent is described here:
+
+Open_ai_news_agent/
+├── news_agent_example.ipynb 
+
+This is an intermediate version of the agent, used for the article. This version demonstrates the main principle of the news collection and processing with OpenAI SDK library, but the agent is not yet optimized by token usage and performance. 
+
+At the start of the notebook, I list the recommended versions of the libraries I used for the proposed code. Uncomment the "pip install" cell and install them before running the notebook in your environment. 
+You can experiment with the system prompt and chose different news topics to query. 
+
 
